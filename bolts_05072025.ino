@@ -1,8 +1,8 @@
 #define dirPin 8
 #define stepPin 9
 
-const int botonPins[6] = {2, 3, 4, 5, 6, 7};  // Pines para los botones
-const int posiciones[6] = {0, 67, 133, 200, 267, 333}; // Posiciones en pasos
+const int botonPins[6] = {2, 3, 4, 5, 6, 7};
+const int posiciones[6] = {0, 67, 133, 200, 267, 333};
 
 int posicionActual = 0;
 
@@ -11,32 +11,38 @@ void setup() {
   pinMode(stepPin, OUTPUT);
 
   for (int i = 0; i < 6; i++) {
-    pinMode(botonPins[i], INPUT_PULLUP);  // Usamos INPUT_PULLUP
+    pinMode(botonPins[i], INPUT_PULLUP);
   }
 }
 
 void loop() {
   for (int i = 0; i < 6; i++) {
     if (digitalRead(botonPins[i]) == LOW) {
-      moverAMotor(posiciones[i]);
-      delay(500); // Evitar múltiples lecturas por rebote
+      moverAPosicion(posiciones[i]);
+      delay(500);
     }
   }
 }
 
-void moverAMotor(int nuevaPosicion) {
+void moverAPosicion(int nuevaPosicion) {
   int pasos = nuevaPosicion - posicionActual;
 
-  if (pasos == 0) return;  // Ya está en la posición
+  // 🔁 Movimiento circular optimizado
+  if (pasos < -200) {
+    pasos = 400 + pasos;
+  } else if (pasos > 200) {
+    pasos = pasos - 400;
+  }
 
-  // Dirección: HIGH si va en sentido horario
+  if (pasos == 0) return;
+
   digitalWrite(dirPin, pasos > 0 ? HIGH : LOW);
 
   for (int i = 0; i < abs(pasos); i++) {
     digitalWrite(stepPin, HIGH);
-    delayMicroseconds(1000);  // Puedes ajustar la velocidad aquí
+    delayMicroseconds(2000);
     digitalWrite(stepPin, LOW);
-    delayMicroseconds(1000);
+    delayMicroseconds(2000);
   }
 
   posicionActual = nuevaPosicion;
